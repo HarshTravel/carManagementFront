@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="styles.css">
+	<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="auth.js"></script>
+	<script src="script.js"></script>
+	<title>Vehicle Management</title>
+</head>
+
+<body>
+	<div class="container">
+		<header>
+			<h1>Car Management System</h1>
+			<nav>
+				<button class="nav-button" onclick="creerVehicle();">New Vehicle</button>
+				<button class="nav-button" onclick="modifierVehicle();">Modify Vehicle</button>
+				<button class="nav-button" onclick="deleteVehicle();">Delete Vehicle</button>
+				<button class="nav-button" onclick="listVehicle();">List Vehicles</button>
+				<button class="nav-button" id="logoutButton">Logout</button>
+			</nav>
+		</header>
+
+		<main>
+			<section id="zoneNewVehicle">
+				<h2>New Vehicle</h2>
+				<form id="newVehicleForm">
+					<div class="form-group">
+						<label for="txtIdN">ID</label>
+						<input id="txtIdN" type="text" required>
+					</div>
+					<div class="form-group">
+						<label for="txtBrandN">Brand</label>
+						<input id="txtBrandN" type="text" required>
+					</div>
+					<div class="form-group">
+						<label for="txtModelN">Model</label>
+						<input id="txtModelN" type="text" required>
+					</div>
+					<div class="form-group">
+						<label for="txtYearN">Year</label>
+						<input id="txtYearN" type="text" required>
+					</div>
+					<div class="form-group">
+						<label for="txtColorN">Color</label>
+						<input id="txtColorN" type="text" required>
+					</div>
+					<div class="form-group">
+						<label for="txtImageN">Image</label>
+						<input id="txtImageN" type="text" required>
+					</div>
+					<div class="form-actions">
+						<button type="button" class="btn-primary" onclick="save();">Save</button>
+						<button type="reset" class="btn-secondary">Cancel</button>
+					</div>
+				</form>
+			</section>
+
+			<section id="zoneModificationVehicle" style="display: none;">
+				<h2>Modify Vehicle</h2>
+				<form id="modifyVehicleForm">
+					<div class="form-group">
+						<label for="txtIdM">Vehicle ID</label>
+						<input id="txtIdM" type="text" required>
+						<button type="button" class="btn-secondary search" onclick="searchEdit();">Search</button>
+					</div>
+					<div class="form-group">
+						<label for="txtBrandM">Brand</label>
+						<input id="txtBrandM" type="text" required>
+					</div>
+					<div class="form-group">
+						<label for="txtModelM">Model</label>
+						<input id="txtModelM" type="text" required>
+					</div>
+					<div class="form-group">
+						<label for="txtYearM">Year</label>
+						<input id="txtYearM" type="text" required>
+					</div>
+					<div class="form-group">
+						<label for="txtColorM">Color</label>
+						<input id="txtColorM" type="text" required>
+					</div>
+					<div class="form-group">
+						<label for="txtImageM">Image</label>
+						<input id="txtImageM" type="text" required>
+					</div>
+					<div class="form-actions">
+						<button type="button" class="btn-primary" onclick="modifier();">Modify</button>
+						<button type="reset" class="btn-secondary">Cancel</button>
+					</div>
+				</form>
+			</section>
+
+			<section id="zoneDeletionVehicle" style="display: none;">
+				<h2>Delete Vehicle</h2>
+				<form id="deleteVehicleForm">
+					<div class="form-group">
+						<label for="txtIdS">Vehicle ID</label>
+						<input id="txtIdS" type="text" required>
+						<button type="button" class="btn-secondary search" onclick="searchDeletion();">Search</button>
+					</div>
+					<div class="form-group">
+						<label for="txtBrandS">Brand</label>
+						<input id="txtBrandS" type="text" readonly>
+					</div>
+					<div class="form-group">
+						<label for="txtModelS">Model</label>
+						<input id="txtModelS" type="text" readonly>
+					</div>
+					<div class="form-group">
+						<label for="txtYearS">Year</label>
+						<input id="txtYearS" type="text" readonly>
+					</div>
+					<div class="form-group">
+						<label for="txtColorS">Color</label>
+						<input id="txtColorS" type="text" readonly>
+					</div>
+					<div class="form-group">
+						<label for="txtImageS">Image</label>
+						<input id="txtImageS" type="text" readonly>
+					</div>
+					<div class="form-actions">
+						<button type="button" class="btn-danger" onclick="Delete();">Delete</button>
+						<button type="reset" class="btn-secondary">Cancel</button>
+					</div>
+				</form>
+			</section>
+
+			<section id="zoneListVehicle" style="display: none;">
+				<h2>Vehicle List</h2>
+				<div class="search-container">
+					<input id="searchInput" type="text" placeholder="Search by Brand or Model" />
+					<button type="button" class="btn-primary" onclick="searchVehicle();">Search</button>
+					<button type="button" class="btn-secondary" onclick="listVehicle();">Clear</button>
+				</div>
+				<table id="vehicleTable">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Brand</th>
+							<th>Model</th>
+							<th>Year</th>
+							<th>Color</th>
+							<th>Image</th>
+							<th>Action</th> 
+						</tr>
+					</thead>
+					<tbody id="idBodyTable"></tbody>
+
+				</table>
+			</section>
+
+		</main>
+	</div>
+	<script>
+		$(document).ready(function () {
+			$('#logoutButton').on('click', function () {
+				firebase.auth().signOut().then(() => {
+					window.location.href = 'auth.html';
+				}).catch((error) => {
+					console.error('Error signing out:', error);
+				});
+			});
+		});
+	</script>
+</body>
+
+</html>
